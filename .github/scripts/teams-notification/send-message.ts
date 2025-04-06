@@ -1,5 +1,5 @@
 import * as core from "@actions/core";
-import { exitWithError } from ".github/scripts/helpers";
+import { exitWithError } from "../helpers";
 
 interface SendNotificationArgs {
   webhook: string;
@@ -17,11 +17,11 @@ export const sendMessage = async ({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        "type": "message",
-        "attachments": [
+        type: "message",
+        attachments: [
           {
-            "contentType": "application/vnd.microsoft.card.adaptive",
-            "content": message,
+            contentType: "application/vnd.microsoft.card.adaptive",
+            content: message,
           },
         ],
       }),

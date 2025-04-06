@@ -15,6 +15,10 @@ env:
   TEAMS_WEBHOOK_URL: ${{ vars.TEAMS_WEBHOOK_URL }}
   JIRA_USERNAME: ${{ vars.JIRA_USERNAME }}
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   update-issue-status:
     runs-on: ubuntu-latest

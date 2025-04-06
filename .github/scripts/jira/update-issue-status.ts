@@ -1,5 +1,4 @@
 import * as github from "@actions/github";
-import { getEnv } from "../helpers";
 import { createMessage, sendMessage } from "../teams-notification";
 import { getTeamsMentionByGitUser } from "../teams-notification/utils";
 import {
@@ -8,6 +7,7 @@ import {
 } from "../pull-request-title-utils";
 import { JIRA_URL, JiraStatusName } from "./constants";
 import { updateTransition } from "./transitions";
+import { getEnv } from "../helpers";
 
 const webhook = getEnv("TEAMS_WEBHOOK_URL");
 const JIRA_STATUS = getEnv("JIRA_STATUS") as JiraStatusName;

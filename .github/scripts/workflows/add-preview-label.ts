@@ -1,8 +1,6 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-import { getEnv, getOctokit } from "../helpers";
-
-const webhook = getEnv("TEAMS_WEBHOOK_URL");
+import { getOctokit } from "../helpers";
 
 async function handleFailure(errorMessage: string): Promise<void> {
   core.setFailed(errorMessage);
@@ -19,11 +17,6 @@ async function run(): Promise<void> {
       );
     }
 
-    const { data: pullRequest } = await octokit.rest.pulls.get({
-      owner: repository.owner.login,
-      repo: repository.name,
-      pull_number: currentPr.number,
-    });
     await octokit.rest.issues.addLabels({
       owner: repository.owner.login,
       repo: repository.name,

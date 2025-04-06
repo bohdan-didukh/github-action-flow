@@ -1,0 +1,12 @@
+name: Deploy web app
+
+on:
+  pull_request_review_comment:
+    types: [deleted]
+
+jobs:
+  update-issue-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log Github Event
+        run: echo ${{ github.event_name }}

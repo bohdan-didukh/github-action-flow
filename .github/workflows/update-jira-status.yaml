@@ -1,0 +1,61 @@
+name: Update Jira Status
+
+on:
+  pull_request:
+    types: [labeled]
+
+  workflow_run:
+    workflows: ["Deploy web app", "Add `preview` label"]
+    types: [completed]
+
+  pull_request_target:
+    types: [closed]
+
+env:
+  TEAMS_WEBHOOK_URL: ${{ vars.TEAMS_WEBHOOK_URL }}
+  JIRA_USERNAME: ${{ vars.JIRA_USERNAME }}
+
+jobs:
+  update-issue-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Move issue to "Ready to deploy" after manually adding "preview" label
+        if: github.event_name == 'pull_request' && contains(github.event.label.name, 'preview')
+        run: bun .github/scripts/jira/update-issue-status.ts
+        env:
+          JIRA_STATUS: "Ready to deploy"
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+      - name: Move issue to "Ready to deploy" after [Add `preview` label"] workflow
+        if: github.event_name == 'workflow_run' && github.event.workflow_run.name == 'Add `preview` label' && github.event.workflow_run.conclusion == 'success'
+        run: bun .github/scripts/jira/update-issue-status.ts
+        env:
+          JIRA_STATUS: "Ready to deploy"
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+      - name: Move issue to "Deployed to DEV" after deployment
+        if: github.event_name == 'workflow_run' && github.event.workflow_run.name == 'Deploy web app' && github.event.workflow_run.conclusion == 'success'
+        run: bun .github/scripts/jira/update-issue-status.ts
+        env:
+          JIRA_STATUS: "Deployed to DEV"
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+      - name: Move issue to "Ready to deploy" after PR merge
+        if: github.event_name == 'pull_request_target' && github.event.pull_request.merged == true && !contains(fromJSON('["develop", "main", "p2p-beta"]'), github.event.pull_request.base.ref)
+        run: bun .github/scripts/jira/update-issue-status.ts
+        env:
+          JIRA_STATUS: "Ready to deploy"
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+      - name: Log Github Event
+        run: echo ${{ github.event_name }}
+
+      - name: Log Workflow Name
+        if: github.event_name == 'workflow_run'
+        run: echo ${{ github.event.workflow_run.name }}

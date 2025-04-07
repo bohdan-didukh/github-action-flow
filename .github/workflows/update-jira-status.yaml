@@ -16,8 +16,8 @@ env:
   JIRA_USERNAME: ${{ vars.JIRA_USERNAME }}
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+  actions: read
 
 jobs:
   update-issue-status:

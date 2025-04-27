@@ -15,7 +15,7 @@ const { pull_request: currentPr } = github.context.payload;
 const title = currentPr?.title;
 
 console.log("pull_requests is", github.context.payload.pull_requests);
-console.log("payloqe is", currentPr);
+console.log("payload is", github.context.payload);
 
 if (isValidPullRequestTitle(title)) {
   const issues = getTaskNumbers(title);

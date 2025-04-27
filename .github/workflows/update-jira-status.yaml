@@ -12,6 +12,7 @@ on:
     types: [closed]
 
 env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   TEAMS_WEBHOOK_URL: ${{ vars.TEAMS_WEBHOOK_URL }}
   JIRA_USERNAME: ${{ vars.JIRA_USERNAME }}
 

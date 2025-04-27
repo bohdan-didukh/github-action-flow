@@ -14,26 +14,34 @@ const JIRA_STATUS = getEnv("JIRA_STATUS") as JiraStatusName;
 
 const { pull_request, workflow_run } = github.context.payload;
 
-let currentPr = pull_request;
-
 const octokit = getOctokit();
 
-if (!currentPr && workflow_run) {
+let prNumber: number | undefined;
+
+if (pull_request) {
+  prNumber = pull_request.number;
+} else if (workflow_run) {
   const pr = workflow_run?.pull_requests?.find(
     ({ base }) => base.ref === "main"
   );
-
-  if (pr) {
-    const response = await octokit.rest.pulls.get({
-      owner: github.context.repo.owner,
-      repo: github.context.repo.repo,
-      pull_number: pr.number,
-    });
-
-    console.log("response", response);
-  }
+  prNumber = pr?.number;
 }
-const title = currentPr?.title;
+
+if (!prNumber) {
+  throw new Error("Pull request number not found");
+}
+
+const { data: currentPr } = await octokit.rest.pulls.get({
+  owner: github.context.repo.owner,
+  repo: github.context.repo.repo,
+  pull_number: prNumber,
+});
+
+if (!currentPr) {
+  throw new Error("Pull request not found");
+}
+
+const title = currentPr.title;
 
 if (isValidPullRequestTitle(title)) {
   const issues = getTaskNumbers(title);

@@ -14,7 +14,7 @@ const JIRA_STATUS = getEnv("JIRA_STATUS") as JiraStatusName;
 const { pull_request: currentPr } = github.context.payload;
 const title = currentPr?.title;
 
-console.log("currentPr", currentPr);
+console.log("payload is", github.context.payload);
 
 if (isValidPullRequestTitle(title)) {
   const issues = getTaskNumbers(title);

@@ -15,6 +15,7 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   TEAMS_WEBHOOK_URL: ${{ vars.TEAMS_WEBHOOK_URL }}
   JIRA_USERNAME: ${{ vars.JIRA_USERNAME }}
+  JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
 permissions:
   contents: read
@@ -35,28 +36,24 @@ jobs:
         run: bun .github/scripts/jira/update-issue-status.ts
         env:
           JIRA_STATUS: "Ready to deploy"
-          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
       - name: Move issue to "Ready to deploy" after [Add `preview` label"] workflow
         if: github.event_name == 'workflow_run' && github.event.workflow_run.name == 'Add `preview` label' && github.event.workflow_run.conclusion == 'success'
         run: bun .github/scripts/jira/update-issue-status.ts
         env:
           JIRA_STATUS: "Ready to deploy"
-          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
       - name: Move issue to "Deployed to DEV" after deployment
         if: github.event_name == 'workflow_run' && github.event.workflow_run.name == 'Deploy web app' && github.event.workflow_run.conclusion == 'success'
         run: bun .github/scripts/jira/update-issue-status.ts
         env:
           JIRA_STATUS: "Deployed to DEV"
-          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
       - name: Move issue to "Ready to deploy" after PR merge
         if: github.event_name == 'pull_request_target' && github.event.pull_request.merged == true && !contains(fromJSON('["develop", "main", "p2p-beta"]'), github.event.pull_request.base.ref)
         run: bun .github/scripts/jira/update-issue-status.ts
         env:
           JIRA_STATUS: "Ready to deploy"
-          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
       - name: Log Github Event
         run: echo ${{ github.event_name }}

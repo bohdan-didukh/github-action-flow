@@ -1,5 +1,5 @@
 import * as github from "@actions/github";
-import { getEnv } from "../helpers";
+import { getEnv, getOctokit } from "../helpers";
 import { createMessage, sendMessage } from "../teams-notification";
 import { getTeamsMentionByGitUser } from "../teams-notification/utils";
 import {
@@ -11,11 +11,29 @@ import { updateTransition } from "./transitions";
 
 const webhook = getEnv("TEAMS_WEBHOOK_URL");
 const JIRA_STATUS = getEnv("JIRA_STATUS") as JiraStatusName;
-const { pull_request: currentPr } = github.context.payload;
-const title = currentPr?.title;
 
-console.log("pull_requests is", github.context.payload.pull_requests);
-console.log("payload is", github.context.payload);
+const { pull_request, workflow_run } = github.context.payload;
+
+let currentPr = pull_request;
+
+const octokit = getOctokit();
+
+if (!currentPr && workflow_run) {
+  const pr = workflow_run?.pull_requests?.find(
+    ({ base }) => base.ref === "main"
+  );
+
+  if (pr) {
+    const response = await octokit.rest.pulls.get({
+      owner: github.context.repo.owner,
+      repo: github.context.repo.repo,
+      pull_number: pr.number,
+    });
+
+    console.log("response", response);
+  }
+}
+const title = currentPr?.title;
 
 if (isValidPullRequestTitle(title)) {
   const issues = getTaskNumbers(title);
